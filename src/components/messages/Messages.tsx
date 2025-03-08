@@ -192,7 +192,9 @@ export const Messages = ({ recipientId, recipientName, onClose }: MessagesProps)
         return;
       }
 
-      setMessages(prev => [...prev, data]);
+      // Don't add the message locally since it will come through the realtime subscription
+      // This prevents duplicate messages from race conditions
+      // setMessages(prev => [...prev, data]);
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -210,7 +212,7 @@ export const Messages = ({ recipientId, recipientName, onClose }: MessagesProps)
   const isRecipient = messages.some(m => m.receiver_id === user?.id);
 
   return (
-    <div className="flex flex-col h-screen sm:h-[600px] bg-background fixed inset-0 z-50">
+    <div className="flex flex-col h-[100dvh] sm:h-[600px] bg-background fixed inset-0 z-50">
       <MessageHeader
         recipientName={recipientName}
         recipientAvatar={recipientAvatar}
@@ -228,7 +230,7 @@ export const Messages = ({ recipientId, recipientName, onClose }: MessagesProps)
         isRecipient={isRecipient}
         recipientName={recipientName}
       />
-      <div className="border-t p-3 sm:p-4 mt-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+      <div className="border-t p-3 sm:p-4 mt-auto mb-safe bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
         <MessageInput
           message={message}
           onChange={setMessage}
