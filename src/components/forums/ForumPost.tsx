@@ -27,6 +27,7 @@ export const ForumPost = ({
   const [showComments, setShowComments] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
 
   const handleLike = () => {
     onLike(message.id);
@@ -46,72 +47,76 @@ export const ForumPost = ({
       setReplyingTo(null);
     }
   };
+const toggleReplies = (commentId: string) => {
+  setExpandedComments(prev => {
+    const newSet = new Set(prev);
+    if (newSet.has(commentId)) {
+      newSet.delete(commentId);
+    } else {
+      newSet.add(commentId);
+    }
+    return newSet;
+  });
+};
 
-  const renderComment = (comment: Comment, level: number = 0) => {
-    return (
-      <div key={comment.id} className={`flex space-x-3 ${level > 0 ? 'ml-8 relative before:absolute before:left-[-16px] before:top-8 before:bottom-0 before:w-[2px] before:bg-border' : ''}`}>
-        <div className="relative">
+const renderComment = (comment: Comment) => {
+  const showReplies = expandedComments.has(comment.id);
+  return (
+      <div key={comment.id}>
+        <div className="flex items-start space-x-2">
           <ViewableProfilePicture
             avatarUrl={comment.user.avatar_url}
             size="sm"
-            className="flex-shrink-0"
+            className="flex-shrink-0 w-6 h-6"
           />
-          {level > 0 && (
-            <div className="absolute left-[-16px] top-4 w-[16px] h-[2px] bg-border" />
-          )}
-        </div>
-        <div className="flex-1">
-          <div className={`bg-muted rounded-xl p-3 ${level > 0 ? 'bg-background border border-border' : ''}`}>
-            <div className="font-semibold text-sm">
-              {comment.user.first_name} {comment.user.last_name}
+          <div className="flex-1">
+            <div className="inline-flex items-center gap-2">
+              <span className="text-xs font-medium">
+                {comment.user.first_name} {comment.user.last_name}
+              </span>
+              <span className="text-xs text-zinc-500">
+                • {format(new Date(comment.created_at), 'MMM d')}
+              </span>
             </div>
-            {level > 0 && comment.parent_id && (
-              <div className="text-xs text-muted-foreground mt-1">
-                Replying to {findParentComment(comment.parent_id)?.user.first_name} {findParentComment(comment.parent_id)?.user.last_name}
+            <div className="text-sm mt-1 text-zinc-800">{comment.content}</div>
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="flex items-center gap-4 mt-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900"
+                  onClick={() => toggleReplies(comment.id)}
+                >
+                  <MessageCircle className="w-3 h-3 mr-1" />
+                  {showReplies ? 'Hide Replies' : `View ${comment.replies.length} ${comment.replies.length === 1 ? 'Reply' : 'Replies'}`}
+                </Button>
               </div>
             )}
-            <div className="text-sm mt-1">{comment.content}</div>
-          </div>
-          <div className="flex items-center gap-4 mt-1">
-            <div className="text-xs text-muted-foreground ml-3">
-              {format(new Date(comment.created_at), 'MMM d, yyyy h:mm a')}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
-              onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-            >
-              <Reply className="w-3 h-3 mr-1" />
-              Reply
-            </Button>
-          </div>
-          {replyingTo === comment.id && (
-            <div className="flex items-center space-x-2 mt-2 ml-4">
-              <div className="relative w-full">
-                <div className="absolute left-[-20px] top-4 w-[16px] h-[2px] bg-border" />
-                <Textarea
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder={`Reply to ${comment.user.first_name}...`}
-                  className="min-h-0 h-9 py-2 px-3 resize-none bg-background border border-border text-sm"
-                />
+            {showReplies && comment.replies && comment.replies.length > 0 && (
+              <div className="mt-3 space-y-3 ml-6 border-l-2 border-zinc-200 pl-4">
+                {comment.replies.map((reply) => (
+                  <div key={reply.id} className="flex items-start space-x-2">
+                    <ViewableProfilePicture
+                      avatarUrl={reply.user.avatar_url}
+                      size="sm"
+                      className="flex-shrink-0 w-6 h-6"
+                    />
+                    <div className="flex-1">
+                      <div className="inline-flex items-center gap-2">
+                        <span className="text-xs font-medium">
+                          {reply.user.first_name} {reply.user.last_name}
+                        </span>
+                        <span className="text-xs text-zinc-500">
+                          • {format(new Date(reply.created_at), 'MMM d')}
+                        </span>
+                      </div>
+                      <div className="text-sm mt-1 text-zinc-800">{reply.content}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <Button 
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => handleReply(comment.id)}
-                disabled={!replyContent.trim()}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-          {comment.replies && comment.replies.length > 0 && (
-            <div className="mt-3 space-y-3">
-              {comment.replies.map((reply) => renderComment(reply, level + 1))}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     );
@@ -122,52 +127,57 @@ export const ForumPost = ({
   };
 
   return (
-    <div className="divide-y divide-border p-2 bg-white rounded-md">
-      {/* Post Header */}
+    <div className="bg-white rounded-md border hover:border-zinc-400 transition-colors">
+      {/* Post Header & Content */}
       <div className="p-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 mb-3">
           <ViewableProfilePicture
             avatarUrl={message.user.avatar_url}
             size="sm"
+            className="w-7 h-7"
           />
-          <div className="flex flex-col justify-center">
-            <div className="font-medium text-sm leading-tight">
+          <div className="flex items-center text-[13px]">
+            <span className="font-medium text-zinc-900">
               {message.user.first_name} {message.user.last_name}
-            </div>
-            <div className="text-xs text-muted-foreground leading-tight">
-              {format(new Date(message.created_at), 'MMM d, yyyy h:mm a')}
-            </div>
+            </span>
+            <span className="text-zinc-500 mx-1">•</span>
+            <span className="text-zinc-500">
+              {format(new Date(message.created_at), 'MMM d, yyyy')}
+            </span>
           </div>
         </div>
 
         {/* Post Content */}
-        <div className="mt-4 text-sm">
-          <p className="whitespace-pre-wrap">{message.content}</p>
+        <div className="pl-9">
+          <p className="text-[15px] leading-[1.6] text-zinc-900 whitespace-pre-wrap">{message.content}</p>
         </div>
 
         {/* Attachments */}
         {message.attachments && message.attachments.length > 0 && (
-          <div className="mt-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="mt-3 pl-9">
+            <div className="overflow-hidden rounded-md border border-zinc-200">
               {message.attachments.map((attachment, index) => {
                 if (attachment.type === 'image') {
                   return (
-                    <div key={index} className="relative pt-[100%]">
+                    <div
+                      key={index}
+                      className="cursor-zoom-in overflow-hidden bg-zinc-50"
+                      onClick={() => window.open(attachment.url, '_blank')}
+                    >
                       <img
                         src={attachment.url}
                         alt={attachment.name}
-                        className="absolute inset-0 w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90"
-                        onClick={() => window.open(attachment.url, '_blank')}
+                        className="w-full h-auto max-h-[512px] object-contain hover:opacity-95 transition-opacity"
                       />
                     </div>
                   );
                 } else if (attachment.type === 'video') {
                   return (
-                    <div key={index} className="relative pt-[100%]">
+                    <div key={index} className="bg-black">
                       <video
                         src={attachment.url}
                         controls
-                        className="absolute inset-0 w-full h-full object-cover rounded-md"
+                        className="w-full h-auto max-h-[512px]"
                       />
                     </div>
                   );
@@ -203,65 +213,105 @@ export const ForumPost = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 divide-x divide-border">
-        <Button
-          variant="ghost"
-          className={`rounded-none h-8 ${message.isLiked ? 'text-primary' : ''}`}
-          onClick={handleLike}
-        >
-          <Heart className={`w-4 h-4 ${message.isLiked ? 'fill-primary text-primary' : ''}`} />
-        </Button>
-        <Button
-          variant="ghost"
-          className="rounded-none h-8 flex items-center justify-center space-x-1"
-          onClick={() => setShowComments(!showComments)}
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span className="text-xs">{message.comments?.length || 0}</span>
-        </Button>
+      <div className="border-t border-zinc-200 px-4 py-2">
+        <div className="flex items-center gap-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-8 px-2 hover:bg-zinc-100 ${message.isLiked ? 'text-orange-500' : 'text-zinc-500'}`}
+            onClick={handleLike}
+          >
+            <Heart className={`w-4 h-4 mr-2 ${message.isLiked ? 'fill-orange-500 text-orange-500' : ''}`} />
+            <span className="text-xs font-medium">
+              {message.likes > 0 ? message.likes : 'Like'}
+            </span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 text-zinc-500 hover:bg-zinc-100 flex items-center"
+            onClick={() => setShowComments(!showComments)}
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            <span className="text-xs font-medium">
+              {message.comments?.length || 0} Comments
+            </span>
+          </Button>
+        </div>
       </div>
 
       {/* Comments Section */}
       {showComments && (
-        <div className="p-2 bg-muted/30">
-          {/* Comment List */}
-          <div className="max-h-[240px] overflow-y-auto pr-2" style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgb(203 213 225) transparent'
-          }}>
-            <div className="space-y-4">
-              {message.comments && message.comments.length > 0 ? (
-                message.comments.map((comment) => !comment.parent_id && renderComment(comment))
-              ) : (
-                <div className="text-center text-sm text-muted-foreground py-4">
-                  No comments yet
-                </div>
-              )}
+        <div className="border-t">
+          {/* New Comment Input */}
+          <div className="p-3 bg-zinc-50">
+            <div className="flex items-center space-x-3">
+              <ViewableProfilePicture
+                avatarUrl={currentUserAvatar}
+                size="sm"
+                className="w-8 h-8"
+              />
+              <div className="flex-1">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="What are your thoughts?"
+                  className="min-h-[80px] py-2 px-3 resize-none bg-white border-zinc-200 focus:border-blue-500 text-sm"
+                />
+                <Button
+                  size="sm"
+                  className="mt-2 px-4 bg-zinc-800 hover:bg-zinc-900 text-white"
+                  onClick={handleComment}
+                  disabled={!newComment.trim()}
+                >
+                  Comment
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* New Comment Input */}
-          <div className="flex items-center space-x-3 mt-2 pt-2 border-t">
-            <ViewableProfilePicture
-              avatarUrl={currentUserAvatar}
-              size="sm"
-            />
-            <div className="flex-1 flex items-center space-x-2">
-              <Textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Write a comment..."
-                className="min-h-0 h-9 py-2 px-3 resize-none bg-muted"
-              />
-              <Button
-                size="icon"
-                className="h-9 w-9"
-                onClick={handleComment}
-                disabled={!newComment.trim()}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+          {/* Comment List */}
+          <div className="divide-y divide-zinc-100">
+            {message.comments && message.comments.length > 0 ? (
+              message.comments.map((comment) => !comment.parent_id && (
+                <div key={comment.id} className="py-4 px-4">
+                  {renderComment(comment)}
+                  <div className="ml-8 mt-2 flex items-center gap-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-xs text-zinc-500 hover:text-zinc-900"
+                      onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                    >
+                      <Reply className="w-3 h-3 mr-1" />
+                      Reply
+                    </Button>
+                  </div>
+                  {replyingTo === comment.id && (
+                    <div className="flex items-center space-x-2 mt-3 ml-8">
+                      <Textarea
+                        value={replyContent}
+                        onChange={(e) => setReplyContent(e.target.value)}
+                        placeholder={`Reply to ${comment.user.first_name}...`}
+                        className="min-h-0 h-9 py-2 px-3 resize-none bg-white border text-sm"
+                      />
+                      <Button
+                        size="icon"
+                        className="h-9 w-9"
+                        onClick={() => handleReply(comment.id)}
+                        disabled={!replyContent.trim()}
+                      >
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-sm text-zinc-500 py-8">
+                No comments yet. Be the first to share what you think!
+              </div>
+            )}
           </div>
         </div>
       )}
