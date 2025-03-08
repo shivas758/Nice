@@ -117,7 +117,7 @@ export const MessageList = ({
   };
 
   return (
-    <ScrollArea className="flex-1 px-3 sm:px-4 py-2 sm:py-4">
+    <ScrollArea className="flex-1 px-3 sm:px-4 py-2 sm:py-4 h-[calc(100dvh-8rem)] sm:h-[calc(100%-8rem)]">
       {messages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full">
           <span className="text-4xl mb-2">💬</span>
