@@ -213,15 +213,17 @@ export const Messages = ({ recipientId, recipientName, onClose }: MessagesProps)
 
   return (
     <div className="flex flex-col h-[100dvh] sm:h-[600px] bg-background fixed inset-0 z-50">
-      <MessageHeader
-        recipientName={recipientName}
-        recipientAvatar={recipientAvatar}
-        isPending={isPending}
-        isRecipient={isRecipient}
-        onAccept={() => handleMessageRequest("accepted")}
-        onDecline={() => handleMessageRequest("rejected")}
-        onBack={onClose || (() => {})}
-      />
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <MessageHeader
+          recipientName={recipientName}
+          recipientAvatar={recipientAvatar}
+          isPending={isPending}
+          isRecipient={isRecipient}
+          onAccept={() => handleMessageRequest("accepted")}
+          onDecline={() => handleMessageRequest("rejected")}
+          onBack={onClose || (() => {})}
+        />
+      </div>
       <MessageList
         messages={messages}
         currentUserId={user?.id || ""}
