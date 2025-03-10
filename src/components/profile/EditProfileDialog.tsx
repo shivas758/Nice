@@ -22,6 +22,8 @@ interface EditProfileDialogProps {
   profile: any;
 }
 
+import { useState } from "react";
+
 export const EditProfileDialog = ({
   isEditing,
   setIsEditing,
@@ -33,10 +35,14 @@ export const EditProfileDialog = ({
   languages,
   profile,
 }: EditProfileDialogProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
   const onUpdateProfile = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
       if (!user?.id) throw new Error("No user ID");
 
@@ -58,8 +64,12 @@ export const EditProfileDialog = ({
         description: "Profile updated successfully!",
       });
       
-      setIsEditing(false);
-      handleUpdateProfile();
+      // Close dialog first
+      handleClose(false);
+      // Then update profile data
+      setTimeout(() => {
+        handleUpdateProfile();
+      }, 100);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
@@ -67,12 +77,25 @@ export const EditProfileDialog = ({
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClose = (open: boolean) => {
+    try {
+      setIsEditing(open);
+    } catch (error) {
+      console.error("Error handling dialog:", error);
     }
   };
 
   return (
-    <Dialog open={isEditing} onOpenChange={setIsEditing}>
-      <DialogContent className="max-w-2xl">
+    <Dialog
+      open={isEditing}
+      onOpenChange={(open) => handleClose(open)}
+    >
+      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
@@ -84,8 +107,13 @@ export const EditProfileDialog = ({
           languages={languages}
           profile={profile}
         />
-        <Button onClick={onUpdateProfile} className="w-full">
-          Save Changes
+        <Button
+          onClick={onUpdateProfile}
+          type="submit"
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </DialogContent>
     </Dialog>
