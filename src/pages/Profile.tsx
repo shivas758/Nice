@@ -9,7 +9,12 @@ import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const handleEditDialogState = (state: boolean) => {
+    console.log("Setting edit state to:", state);
+    setIsEditing(state);
+  };
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -84,25 +89,46 @@ const Profile = () => {
 
   // Handle input changes
   const handleInputChange = (name: string, value: string | string[]) => {
-    console.log("Input changed:", name, value);
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    try {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    } catch (error) {
+      console.error("Error updating form data:", error);
+    }
+  };
+
+  const handleEditClose = () => {
+    try {
+      setIsEditing(false);
+      // Reset form data to current profile values
+      if (profile) {
+        setFormData({
+          first_name: profile.first_name || "",
+          last_name: profile.last_name || "",
+          profession: profile.profession || "",
+          location: profile.location || "",
+          languages: profile.languages || [],
+        });
+      }
+    } catch (error) {
+      console.error("Error closing edit dialog:", error);
+    }
   };
 
   return (
     <div className="pb-20 p-4">
       <ProfileHeader
         profile={profile}
-        setIsEditing={setIsEditing}
+        setIsEditing={handleEditDialogState}
         isLoading={isLoading}
         onProfileUpdate={refetch}
       />
       {!isLoading && (
         <EditProfileDialog
           isEditing={isEditing}
-          setIsEditing={setIsEditing}
+          setIsEditing={handleEditDialogState}
           formData={formData}
           handleInputChange={handleInputChange}
           handleUpdateProfile={refetch}
