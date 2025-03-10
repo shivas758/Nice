@@ -23,6 +23,12 @@ export const HeaderActions = ({ profile, onEditClick }: HeaderActionsProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
+  const handleEditProfileClick = () => {
+    console.log("Edit profile clicked");
+    onEditClick();
+    setIsDropdownOpen(false);
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -47,7 +53,7 @@ export const HeaderActions = ({ profile, onEditClick }: HeaderActionsProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-[200px] p-2">
-            <DropdownMenuItem className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100 rounded" onClick={onEditClick}>
+            <DropdownMenuItem className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100 rounded" onClick={handleEditProfileClick}>
               <Pencil className="h-4 w-4 mr-3" />
               <span className="flex-1">Edit Profile</span>
             </DropdownMenuItem>
