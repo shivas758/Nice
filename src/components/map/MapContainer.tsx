@@ -1,22 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { AlertCircle } from 'lucide-react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+// IMPORTANT: Replace with your Mapbox access token
+mapboxgl.accessToken = 'pk.eyJ1IjoibmFtYWRoYXYiLCJhIjoiY21idXJ0YW9uMDlrZzJqczZsY2RmMTg0OSJ9.KAMklXE0PG0dzx_mg2AnmA';
 interface MapContainerProps {
-  children: (map: L.Map) => React.ReactNode;
+  children: (map: mapboxgl.Map) => React.ReactNode;
   onError: (error: string) => void;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({ children, onError }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<L.Map | null>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const { user } = useAuth();
 
-  // Fetch current user's location
   const { data: currentUserProfile } = useQuery({
     queryKey: ['current-user-location', user?.id],
     queryFn: async () => {
@@ -34,23 +35,25 @@ export const MapContainer: React.FC<MapContainerProps> = ({ children, onError })
   });
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (map.current || !mapContainer.current) return;
 
     try {
-      // Initialize map with a wider default view
-      map.current = L.map(mapContainer.current).setView([20, 0], 2); // Default to a global view
+      const lng = currentUserProfile?.longitude || 0;
+      const lat = currentUserProfile?.latitude || 20;
+      const zoom = currentUserProfile?.latitude ? 11 : 2;
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map.current);
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [lng, lat],
+        zoom: zoom,
+      });
 
-      map.current.zoomControl.setPosition('topright');
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      // If we have the user's location, center the map on it with closer zoom
-      if (currentUserProfile?.latitude && currentUserProfile?.longitude) {
-        const userLatLng = L.latLng(currentUserProfile.latitude, currentUserProfile.longitude);
-        map.current.setView(userLatLng, 11); // Zoom level 11 for local view
-      }
+      map.current.on('load', () => {
+        setMapLoaded(true);
+      });
 
     } catch (err) {
       console.error('Error initializing map:', err);
@@ -59,13 +62,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({ children, onError })
 
     return () => {
       map.current?.remove();
+      map.current = null;
     };
   }, [onError, currentUserProfile]);
 
   return (
     <div className="absolute inset-0 rounded-lg">
       <div ref={mapContainer} className="h-full rounded-lg" />
-      {map.current && children(map.current)}
+      {mapLoaded && map.current && children(map.current)}
     </div>
   );
 };
