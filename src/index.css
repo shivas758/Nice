@@ -95,23 +95,3 @@
     background-attachment: fixed;
   }
 }
-
-/* Custom styles for Leaflet popup */
-.leaflet-popup-content-wrapper {
-  padding: 0 !important;
-  border-radius: 8px !important;
-}
-
-.leaflet-popup-content {
-  margin: 0 !important;
-  line-height: 1.2 !important;
-}
-
-.custom-popup .leaflet-popup-content-wrapper {
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.custom-popup .leaflet-popup-tip {
-  background: white;
-}
