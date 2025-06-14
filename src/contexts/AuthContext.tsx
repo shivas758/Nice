@@ -157,20 +157,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log('User signed in:', currentSession.user?.email);
         setSession(currentSession);
         setUser(currentSession.user);
-        toast({
-          title: "Signed In",
-          description: "Welcome back!",
-        });
+        // toast({
+        //   title: "Signed In",
+        //   description: "Welcome back!",
+        // });
       }
 
       if (event === 'SIGNED_OUT') {
         console.log('User signed out');
         setSession(null);
         setUser(null);
-        toast({
-          title: "Signed Out",
-          description: "You have been signed out.",
-        });
+        // toast({
+        //   title: "Signed Out",
+        //   description: "You have been signed out.",
+        // });
       }
 
       if (event === 'TOKEN_REFRESHED') {
