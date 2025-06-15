@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.netlify.nicedev.twa",
+    "sha256_cert_fingerprints":
+    ["F3:1C:4B:2B:20:B3:1C:7D:42:EA:29:20:27:78:21:ED:DC:50:65:B4:96:0E:8D:FC:90:AA:B4:ED:97:92:E6:2C"]
+  }
+}]
