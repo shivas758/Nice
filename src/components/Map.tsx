@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface MapProps {
   className?: string;
+  users?: any[]; // Add users prop
 }
 
 // Function to calculate distance between two points in kilometers
@@ -24,7 +25,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-const Map: React.FC<MapProps> = ({ className }) => {
+const Map: React.FC<MapProps> = ({ className, users: propUsers }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -53,8 +54,9 @@ const Map: React.FC<MapProps> = ({ className }) => {
     enabled: !!user?.id,
   });
 
-  // Then fetch all users and filter them
-  const { data: users } = useQuery({
+  // Use propUsers if provided, otherwise fetch all users and filter them
+  const { data: fetchedUsers } = useQuery({
+    enabled: !propUsers,
     queryKey: ['map-users', currentUserLocation],
     queryFn: async () => {
       console.log('Fetching all users');
@@ -85,8 +87,10 @@ const Map: React.FC<MapProps> = ({ className }) => {
       // If no current user location, return all users with valid coordinates
       return data.filter(user => user.latitude && user.longitude);
     },
-    enabled: true, // Always enable the query, even without current user location
+    enabled: !propUsers, // Only fetch if propUsers are not provided
   });
+
+  const users = propUsers || fetchedUsers;
 
   if (error) {
     return (
