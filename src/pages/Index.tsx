@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/home/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react"; // Added this import
+import { AlertCircle } from "lucide-react";
+import { calculateDistance } from "@/lib/utils";
 
 const Index = () => {
   const { toast } = useToast();
@@ -15,12 +16,13 @@ const Index = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
     profession: "all",
-    location: "all",
     radius: "5",
     language: "all",
+    showFriendsOnly: false,
   });
   const [showResults, setShowResults] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [userCurrentLocation, setUserCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   // Fetch filter options
   const { data: professions } = useQuery({
@@ -35,17 +37,7 @@ const Index = () => {
     },
   });
 
-  const { data: locations } = useQuery({
-    queryKey: ["locations"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("locations")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
+
 
   const { data: languages } = useQuery({
     queryKey: ["languages"],
@@ -57,6 +49,24 @@ const Index = () => {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fetch current user's location
+
+
+  // Fetch friends list
+  const { data: friendsList } = useQuery({
+    queryKey: ['friendsList', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('friends')
+        .select('user2_id')
+        .eq('user1_id', user.id);
+      if (error) throw error;
+      return data.map((f: { user2_id: any; }) => f.user2_id);
+    },
+    enabled: !!user?.id && filters.showFriendsOnly,
   });
 
   // Update user's location
@@ -90,7 +100,7 @@ const Index = () => {
 
         const { latitude, longitude } = position.coords;
         await updateUserLocation(latitude, longitude);
-        
+        setUserCurrentLocation({ latitude, longitude });
         setLocationError(null);
       } catch (error) {
         console.error('Location error:', error);
@@ -117,16 +127,37 @@ const Index = () => {
       if (filters.profession !== "all") {
         query = query.eq("profession", filters.profession);
       }
-      if (filters.location !== "all") {
-        query = query.eq("location", filters.location);
-      }
+
       if (filters.language !== "all") {
         query = query.contains("languages", [filters.language]);
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+
+      let filteredData = data;
+
+      // Apply distance filter
+      if (filters.radius !== "all" && userCurrentLocation?.latitude && userCurrentLocation?.longitude) {
+        const radiusKm = parseFloat(filters.radius);
+        filteredData = filteredData.filter(profile => {
+          if (!profile.latitude || !profile.longitude) return false;
+          const distance = calculateDistance(
+            userCurrentLocation.latitude,
+            userCurrentLocation.longitude,
+            profile.latitude,
+            profile.longitude
+          );
+          return distance <= radiusKm;
+        });
+      }
+
+      // Apply friends filter
+      if (filters.showFriendsOnly && friendsList) {
+        filteredData = filteredData.filter(profile => friendsList.includes(profile.id));
+      }
+
+      return filteredData;
     },
     enabled: showResults,
   });
@@ -152,8 +183,9 @@ const Index = () => {
         onFilterChange={handleFilterChange}
         onSearch={handleSearch}
         professions={professions}
-        locations={locations}
+
         languages={languages}
+        userCurrentLocation={userCurrentLocation}
       />
 
       <main className="flex-1 container mx-auto max-w-7xl pt-20 px-4 pb-4">
@@ -161,7 +193,7 @@ const Index = () => {
           {/* Map Container - Centered with flex */}
           <div className="flex justify-center items-center min-h-[60vh]">
             <Card className="w-full max-w-4xl h-[50vh] bg-white shadow-lg rounded-xl overflow-hidden">
-              <Map className="w-full h-full" />
+              <Map className="w-full h-full" users={showResults ? filteredUsers : undefined} />
             </Card>
           </div>
 
