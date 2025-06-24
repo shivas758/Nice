@@ -14,19 +14,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface FilterDialogProps {
   filters: {
     profession: string;
-    location: string;
+
     radius: string;
     language: string;
+    showFriendsOnly: boolean;
   };
   onFilterChange: (key: string, value: string) => void;
   onSearch: () => void;
   professions?: any[];
-  locations?: any[];
+
   languages?: any[];
+  userCurrentLocation: { latitude: number; longitude: number } | null;
 }
 
 const FilterDialog = ({
@@ -34,8 +38,9 @@ const FilterDialog = ({
   onFilterChange,
   onSearch,
   professions,
-  locations,
+
   languages,
+  userCurrentLocation,
 }: FilterDialogProps) => {
   const handleSearch = () => {
     onSearch();
@@ -83,47 +88,6 @@ const FilterDialog = ({
           </Select>
 
           <Select
-            value={filters.location}
-            onValueChange={(value) => onFilterChange("location", value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Location" />
-            </SelectTrigger>
-            <SelectContent 
-              className="bg-white shadow-lg" 
-              position="popper" 
-              sideOffset={5}
-              style={{ zIndex: 51 }}
-            >
-              <SelectItem value="all">All Locations</SelectItem>
-              {locations?.map((location) => (
-                <SelectItem key={location.id} value={location.name}>
-                  {location.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={filters.radius}
-            onValueChange={(value) => onFilterChange("radius", value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Radius" />
-            </SelectTrigger>
-            <SelectContent 
-              className="bg-white shadow-lg" 
-              position="popper" 
-              sideOffset={5}
-              style={{ zIndex: 51 }}
-            >
-              <SelectItem value="5">5 miles</SelectItem>
-              <SelectItem value="10">10 miles</SelectItem>
-              <SelectItem value="20">20 miles</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
             value={filters.language}
             onValueChange={(value) => onFilterChange("language", value)}
           >
@@ -144,6 +108,38 @@ const FilterDialog = ({
               ))}
             </SelectContent>
           </Select>
+
+          <Select
+            value={filters.radius}
+            onValueChange={(value) => onFilterChange("radius", value)}
+            disabled={!userCurrentLocation} // Disable if no location
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Distance Range" />
+            </SelectTrigger>
+            <SelectContent 
+              className="bg-white shadow-lg" 
+              position="popper" 
+              sideOffset={5}
+              style={{ zIndex: 51 }}
+            >
+              <SelectItem value="5">5 km</SelectItem>
+              <SelectItem value="10">10 km</SelectItem>
+              <SelectItem value="25">25 km</SelectItem>
+              <SelectItem value="50">50 km</SelectItem>
+              <SelectItem value="75">75 km</SelectItem>
+              <SelectItem value="100">100 km</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="showFriendsOnly">Show Friends Only</Label>
+            <Switch
+              id="showFriendsOnly"
+              checked={filters.showFriendsOnly}
+              onCheckedChange={(checked) => onFilterChange("showFriendsOnly", checked)}
+            />
+          </div>
 
           <DialogTrigger asChild>
             <Button 
