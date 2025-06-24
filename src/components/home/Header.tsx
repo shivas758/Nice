@@ -4,15 +4,16 @@ import FilterDialog from "./FilterDialog";
 interface HeaderProps {
   filters: {
     profession: string;
-    location: string;
+
     radius: string;
     language: string;
   };
   onFilterChange: (key: string, value: string) => void;
   onSearch: () => void;
   professions?: any[];
-  locations?: any[];
+
   languages?: any[];
+  userCurrentLocation: { latitude: number; longitude: number } | null;
 }
 
 const Header = ({
@@ -20,8 +21,9 @@ const Header = ({
   onFilterChange,
   onSearch,
   professions,
-  locations,
+
   languages,
+  userCurrentLocation,
 }: HeaderProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg shadow-sm z-50">
@@ -33,8 +35,9 @@ const Header = ({
             onFilterChange={onFilterChange}
             onSearch={onSearch}
             professions={professions}
-            locations={locations}
+
             languages={languages}
+            userCurrentLocation={userCurrentLocation}
           />
         </div>
       </div>
