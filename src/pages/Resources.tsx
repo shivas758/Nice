@@ -17,7 +17,7 @@ const resourceSections = [
   },
   {
     key: "healthcare",
-    label: "Healthcare",
+    label: "Health Care",
   },
   {
     key: "legal",
@@ -283,9 +283,11 @@ const sectionDetails: Record<string, React.ReactNode> = {
       </table>
     </div>
   ),
-  "healthcare": <div>Healthcare network of doctors and telehealth info (details coming soon)</div>,
+  "healthcare":
+   <div><h3 className="font-semibold mb-2">Health Care</h3>Healthcare network of doctors and telehealth info (details coming soon)</div>,
   "legal": (
     <div>
+      <h3 className="font-semibold mb-2">Legal</h3>
       <div className="mb-2">Domestic Workers Rights for GCC countries:<br/>
         <a href="https://www.migrant-rights.org/activity/know-your-rights-domestic-workers/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Know your rights - Domestic Workers</a>
       </div>
@@ -295,9 +297,11 @@ const sectionDetails: Record<string, React.ReactNode> = {
       <div className="mb-2">Attorney List: (details coming soon)</div>
     </div>
   ),
-  "insurance": <div>Insurance professionals and services (details coming soon)</div>,
+  "insurance": <div>
+    <h3 className="font-semibold mb-2">Insurance</h3>Insurance professionals and services (details coming soon)</div>,
   "pre-departure": (
     <div>
+       <h3 className="font-semibold mb-2">Pre-departure</h3>
       <ul className="list-disc pl-5">
         <li>Check to make sure job designation on your visa matches with the job offered</li>
         <li>Open bank account with any bank in India before departure</li>
@@ -316,6 +320,7 @@ const sectionDetails: Record<string, React.ReactNode> = {
   ),
   "post-arrival": (
     <div>
+       <h3 className="font-semibold mb-2">Post-arrival</h3>
       <ul className="list-disc pl-5">
         <li>Be mindful of local culture, beliefs and laws during your social media activity.</li>
         <li>Traffic laws of the destination country should be strictly obeyed</li>
@@ -329,6 +334,7 @@ const sectionDetails: Record<string, React.ReactNode> = {
   ),
   "female-domestic-workers": (
     <div>
+       <h3 className="font-semibold mb-2">Advice for Female Domestic Workers</h3>
       <div className="font-semibold mb-1">Do's</div>
       <ul className="list-disc pl-5 mb-2">
         <li>Always keep contact details of India Embassy, MADAD, PBSK, and eMigrate with yourself. Keep proper Employment Contract with yourself.</li>
