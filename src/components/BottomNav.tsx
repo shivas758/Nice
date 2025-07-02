@@ -5,9 +5,9 @@ const navItems = [
   { icon: Home, label: "Home", path: "/home" },
   { icon: User, label: "My NICE!", path: "/profile" },
   { icon: Users, label: "Network", path: "/network" },
-  { icon: HeartHandshake, label: "Support", path: "/support" },
+  // { icon: HeartHandshake, label: "Support", path: "/support" },
   { icon: BookOpen, label: "Resources", path: "/resources" },
-  { icon: GamepadIcon, label: "Games", path: "/games" },
+  // { icon: GamepadIcon, label: "Games", path: "/games" },
   { icon: MessageSquare, label: "Forums", path: "/forums" },
 ];
 
