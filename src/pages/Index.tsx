@@ -12,12 +12,13 @@ import { calculateDistance } from "@/lib/utils";
 
 const Index = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
     profession: "all",
-    radius: "5",
+    radius: "",
     language: "all",
+    gender: "all",
     showFriendsOnly: false,
   });
   const [showResults, setShowResults] = useState(false);
@@ -61,10 +62,13 @@ const Index = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('friends')
-        .select('user2_id')
-        .eq('user1_id', user.id);
+        .select('user_id, friend_id')
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
       if (error) throw error;
-      return data.map((f: { user2_id: any; }) => f.user2_id);
+      // Return the IDs of the user's friends (the other user in each row)
+      return data.map((f: { user_id: string; friend_id: string }) =>
+        f.user_id === user.id ? f.friend_id : f.user_id
+      );
     },
     enabled: !!user?.id && filters.showFriendsOnly,
   });
@@ -118,6 +122,16 @@ const Index = () => {
     }
   }, [user]);
 
+  // Fetch all users for default map view
+  const { data: allUsers } = useQuery({
+    queryKey: ["all-users"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Fetch filtered users
   const { data: filteredUsers } = useQuery({
     queryKey: ["filtered-users", filters],
@@ -132,13 +146,18 @@ const Index = () => {
         query = query.contains("languages", [filters.language]);
       }
 
+      if (filters.gender !== "all") {
+        query = query.eq("gender", filters.gender);
+      }
+     
+
       const { data, error } = await query;
       if (error) throw error;
 
       let filteredData = data;
 
-      // Apply distance filter
-      if (filters.radius !== "all" && userCurrentLocation?.latitude && userCurrentLocation?.longitude) {
+      // Apply distance filter only if radius is selected
+      if (filters.radius && userCurrentLocation?.latitude && userCurrentLocation?.longitude) {
         const radiusKm = parseFloat(filters.radius);
         filteredData = filteredData.filter(profile => {
           if (!profile.latitude || !profile.longitude) return false;
@@ -163,7 +182,10 @@ const Index = () => {
   });
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => ({
+      ...prev,
+      [key]: key === "showFriendsOnly" ? value === "true" : value
+    }));
     console.log("Filter changed:", key, value);
   };
 
@@ -176,6 +198,27 @@ const Index = () => {
     });
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      navigate("/login");
+    }
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      profession: "all",
+      radius: "",
+      language: "all",
+      gender: "all",
+      showFriendsOnly: false,
+    });
+    setShowResults(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 overflow-auto">
       <Header
@@ -183,9 +226,10 @@ const Index = () => {
         onFilterChange={handleFilterChange}
         onSearch={handleSearch}
         professions={professions}
-
         languages={languages}
         userCurrentLocation={userCurrentLocation}
+        onLogout={handleLogout}
+        onClearFilters={handleClearFilters}
       />
 
       <main className="flex-1 container mx-auto max-w-7xl pt-20 px-4 pb-4">
@@ -193,7 +237,7 @@ const Index = () => {
           {/* Map Container - Centered with flex */}
           <div className="flex justify-center items-center min-h-[60vh]">
             <Card className="w-full max-w-4xl h-[50vh] bg-white shadow-lg rounded-xl overflow-hidden">
-              <Map className="w-full h-full" users={showResults ? filteredUsers : undefined} />
+              <Map className="w-full h-full" users={showResults ? filteredUsers : allUsers} />
             </Card>
           </div>
 
