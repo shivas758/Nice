@@ -87,7 +87,7 @@ const CompleteProfile = () => {
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Complete Your Profile</h1>
           <p className="text-sm text-muted-foreground">
-            Please fill in your profile details to continue
+          Update your profile to continue
           </p>
         </div>
 
@@ -105,11 +105,13 @@ const CompleteProfile = () => {
 
             <div>
               <Label htmlFor="bio">Bio *</Label>
-              <Input
+              <textarea
                 id="bio"
                 value={formData.bio}
                 onChange={(e) => handleInputChange("bio", e.target.value)}
                 required
+                className="border p-2 rounded w-full min-h-[80px]"
+                placeholder="Please enter 2-3 sentences about your job title, working location, where from in India, etc. For example: My name is Lakshman Reddy. I’m working as a project manager in Dubai for the last 7 years. I’m looking forward to connecting with others in the Gulf countries to learn and help"
               />
             </div>
 
@@ -124,31 +126,16 @@ const CompleteProfile = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="education_level">Education Level *</Label>
-              <Select 
-                value={formData.education_level} 
-                onValueChange={(value) => handleInputChange("education_level", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select education level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["10th", "12th", "undergraduate", "post graduate"].map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          
 
             <div>
-              <Label htmlFor="school">School</Label>
+              <Label htmlFor="school">School Name</Label>
               <Input
                 id="school"
                 value={formData.school}
                 onChange={(e) => handleInputChange("school", e.target.value)}
+                 placeholder="St. Joseph’s High School, Warangal"
+
               />
             </div>
 
@@ -171,7 +158,7 @@ const CompleteProfile = () => {
             </div>
 
             <div>
-              <Label htmlFor="gcc_address">GCC Address *</Label>
+              <Label htmlFor="gcc_address">Gulf Address *</Label>
               <Input
                 id="gcc_address"
                 value={formData.gcc_address}
@@ -191,7 +178,7 @@ const CompleteProfile = () => {
             </div>
 
             <div>
-              <Label htmlFor="gcc_phone">GCC Phone *</Label>
+              <Label htmlFor="gcc_phone">Gulf Phone# *</Label>
               <Input
                 id="gcc_phone"
                 value={formData.gcc_phone}
@@ -201,7 +188,7 @@ const CompleteProfile = () => {
             </div>
 
             <div>
-              <Label htmlFor="india_phone">India Phone *</Label>
+              <Label htmlFor="india_phone">India Phone# *</Label>
               <Input
                 id="india_phone"
                 value={formData.india_phone}
