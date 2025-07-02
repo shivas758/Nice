@@ -20,6 +20,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("");
   const [profession, setProfession] = useState("");
   const [language, setLanguage] = useState("");
   const [maritalStatus, setMaritalStatus] = useState(false);
@@ -113,7 +114,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
         if (!isOTPVerified) {
           toast({
             title: "Error",
-            description: "Please verify your mobile number first",
+            description: "Please verify your mobile number",
             variant: "destructive",
           });
           return;
@@ -182,6 +183,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
               id: signUpData.user.id,
               first_name: firstName,
               last_name: lastName,
+              gender,
               profession,
               languages: [language],
               is_married: maritalStatus,
@@ -333,6 +335,31 @@ const AuthForm = ({ error }: AuthFormProps) => {
                   required
                   className="border p-2 rounded w-full"
                 />
+                <div className="flex items-center gap-4">
+                  <label className="font-medium">Gender:</label>
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="Male"
+                      checked={gender === "Male"}
+                      onChange={() => setGender("Male")}
+                      required
+                    />
+                    Male
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="Female"
+                      checked={gender === "Female"}
+                      onChange={() => setGender("Female")}
+                      required
+                    />
+                    Female
+                  </label>
+                </div>
                 <Select value={profession} onValueChange={setProfession}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select profession" />
@@ -362,7 +389,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
                     <SelectValue placeholder="Select education level" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["10th", "12th", "undergraduate", "post graduate"].map((option) => (
+                    {["10th", "12th", "Undergraduate", "Postgraduate"].map((option) => (
                       <SelectItem key={option} value={option}>
                         {option}
                       </SelectItem>
