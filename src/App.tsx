@@ -66,21 +66,21 @@ const AppContent = () => {
             <Network />
           </ProtectedRoute>
         } />
-        <Route path="/support" element={
+        {/* <Route path="/support" element={
           <ProtectedRoute>
             <Support />
           </ProtectedRoute>
-        } />
+        } /> */}
         <Route path="/resources" element={
           <ProtectedRoute>
             <Resources />
           </ProtectedRoute>
         } />
-        <Route path="/games" element={
+        {/* <Route path="/games" element={
           <ProtectedRoute>
             <Games />
           </ProtectedRoute>
-        } />
+        } /> */}
         <Route path="/forums" element={
           <ProtectedRoute>
             <Forums />
