@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +22,7 @@ const Profile = () => {
     location: "",
     languages: [] as string[],
   });
-
+  
   // Fetch profile data
   const { data: profile, isLoading, refetch } = useQuery({
     queryKey: ["profile", user?.id],
@@ -37,18 +37,24 @@ const Profile = () => {
 
       if (fetchError) throw fetchError;
 
-      // Update form data with existing profile data
-      setFormData({
-        first_name: existingProfile?.first_name || "",
-        last_name: existingProfile?.last_name || "",
-        profession: existingProfile?.profession || "",
-        location: existingProfile?.location || "",
-        languages: existingProfile?.languages || [],
-      });
-
       return existingProfile;
     },
   });
+
+  // Initialize form data with profile data when profile is loaded
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        profession: profile.profession || "",
+        location: profile.location || "",
+        languages: profile.languages || [],
+      });
+    }
+  }, [profile]);
+
+
 
   // Fetch dropdown options
   const { data: professions } = useQuery({
