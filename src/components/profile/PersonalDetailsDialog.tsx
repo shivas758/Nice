@@ -20,11 +20,17 @@ interface PersonalDetailsDialogProps {
   onUpdate: () => void;
   isFirstLogin?: boolean;
   children?: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false, children }: PersonalDetailsDialogProps) => {
-  const [isOpen, setIsOpen] = useState(isFirstLogin);
+export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false, children, isOpen: externalIsOpen, onOpenChange }: PersonalDetailsDialogProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(isFirstLogin);
   const { toast } = useToast();
+  
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = onOpenChange || setInternalIsOpen;
   const [formData, setFormData] = useState({
     bio: profile?.bio || "",
     education_level: profile?.education_level || "",
@@ -98,17 +104,9 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false,
         }
       }}
     >
-      {!isFirstLogin && (
+      {!isFirstLogin && children && !externalIsOpen && (
         <DialogTrigger asChild>
-          {children || (
-            <Button
-              variant="ghost"
-              className="w-full flex items-center gap-2 h-8 px-2 text-sm"
-            >
-              <ClipboardList className="h-4 w-4" />
-              Personal Details
-            </Button>
-          )}
+          {children}
         </DialogTrigger>
       )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
