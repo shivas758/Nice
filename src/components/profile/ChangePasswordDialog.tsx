@@ -15,15 +15,21 @@ import {
 
 interface ChangePasswordDialogProps {
   children?: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const ChangePasswordDialog = ({ children }: ChangePasswordDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const ChangePasswordDialog = ({ children, isOpen: externalIsOpen, onOpenChange }: ChangePasswordDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  
+  // Use external state if provided, otherwise use internal state
+  const open = externalIsOpen !== undefined ? externalIsOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,17 +87,11 @@ export const ChangePasswordDialog = ({ children }: ChangePasswordDialogProps) =>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button
-            variant="ghost"
-            className="w-full flex items-center gap-2 h-8 px-2 text-sm"
-          >
-            <Lock className="h-4 w-4" />
-            Change Password
-          </Button>
-        )}
-      </DialogTrigger>
+      {children && !externalIsOpen && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
