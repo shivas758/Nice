@@ -10,17 +10,19 @@ import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import { calculateDistance } from "@/lib/utils";
 
+const defaultFilters = {
+  profession: "all",
+  radius: "",
+  language: "all",
+  gender: "all",
+  showFriendsOnly: false,
+};
+
 const Index = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [filters, setFilters] = useState({
-    profession: "all",
-    radius: "",
-    language: "all",
-    gender: "all",
-    showFriendsOnly: false,
-  });
+  const [filters, setFilters] = useState(defaultFilters);
   const [showResults, setShowResults] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [userCurrentLocation, setUserCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -209,13 +211,7 @@ const Index = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      profession: "all",
-      radius: "",
-      language: "all",
-      gender: "all",
-      showFriendsOnly: false,
-    });
+    setFilters(defaultFilters);
     setShowResults(false);
   };
 
@@ -230,6 +226,7 @@ const Index = () => {
         userCurrentLocation={userCurrentLocation}
         onLogout={handleLogout}
         onClearFilters={handleClearFilters}
+        defaultFilters={defaultFilters}
       />
 
       <main className="flex-1 container mx-auto max-w-7xl pt-20 px-4 pb-4">
