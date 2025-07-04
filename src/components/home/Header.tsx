@@ -7,6 +7,7 @@ interface HeaderProps {
     profession: string;
     radius: string;
     language: string;
+    gender: string;
     showFriendsOnly: boolean;
   };
   onFilterChange: (key: string, value: string) => void;
@@ -15,6 +16,14 @@ interface HeaderProps {
   languages?: any[];
   userCurrentLocation: { latitude: number; longitude: number } | null;
   onLogout: () => void;
+  onClearFilters: () => void;
+  defaultFilters: {
+    profession: string;
+    radius: string;
+    language: string;
+    gender: string;
+    showFriendsOnly: boolean;
+  };
 }
 
 const Header = ({
@@ -25,6 +34,8 @@ const Header = ({
   languages,
   userCurrentLocation,
   onLogout,
+  onClearFilters,
+  defaultFilters,
 }: HeaderProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg shadow-sm z-50">
@@ -39,6 +50,8 @@ const Header = ({
               professions={professions}
               languages={languages}
               userCurrentLocation={userCurrentLocation}
+              onClearFilters={onClearFilters}
+              defaultFilters={defaultFilters}
             />
             <Button
               variant="outline"
