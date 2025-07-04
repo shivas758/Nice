@@ -4,7 +4,16 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Select = SelectPrimitive.Root
+const SelectContext = React.createContext<{ setOpen: (open: boolean) => void } | undefined>(undefined);
+
+const Select = (props: React.ComponentProps<typeof SelectPrimitive.Root>) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <SelectContext.Provider value={{ setOpen }}>
+      <SelectPrimitive.Root {...props} open={open} onOpenChange={setOpen} />
+    </SelectContext.Provider>
+  );
+};
 
 const SelectGroup = SelectPrimitive.Group
 
@@ -70,12 +79,30 @@ const SelectContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => {
   const [search, setSearch] = React.useState("");
+  const context = React.useContext(SelectContext);
 
+  // Reset search when dropdown is opened/closed
+  React.useEffect(() => {
+    setSearch("");
+  }, [context]);
+
+  // Enhanced filter: match code or country (for country code dropdowns)
   const filterItems = (children: React.ReactNode) => {
     return React.Children.toArray(children).filter((child: any) => {
       if (!search) return true;
       if (child?.type?.displayName === "SelectItem") {
         const text = child.props.children?.toString() || "";
+        // Try to extract code and country from the label
+        const match = text.match(/^\+(\d+) \((.+)\)$/);
+        if (match) {
+          const code = match[1];
+          const country = match[2];
+          return (
+            code.toLowerCase().includes(search.toLowerCase()) ||
+            country.toLowerCase().includes(search.toLowerCase())
+          );
+        }
+        // Fallback: match the whole text
         return text.toLowerCase().includes(search.toLowerCase());
       }
       return true;
