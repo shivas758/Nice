@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ClipboardList } from "lucide-react";
@@ -25,6 +25,7 @@ interface PersonalDetailsDialogProps {
 }
 
 export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false, children, isOpen: externalIsOpen, onOpenChange }: PersonalDetailsDialogProps) => {
+  console.log("Profile prop in PersonalDetailsDialog:", profile);
   const [internalIsOpen, setInternalIsOpen] = useState(isFirstLogin);
   const { toast } = useToast();
   
@@ -39,8 +40,20 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false,
     postgraduate_college: profile?.postgraduate_college || "",
     display_name: profile?.display_name || "",
     date_of_birth: profile?.date_of_birth || "",
-    gcc_address: profile?.gcc_address || "",
-    india_address: profile?.india_address || "",
+    // Gulf Address fields
+    gcc_address1: profile?.gcc_address1 || "",
+    gcc_address2: profile?.gcc_address2 || "",
+    gcc_city: profile?.gcc_city || "",
+    gcc_country: profile?.gcc_country || "",
+    gcc_postal_code: profile?.gcc_postal_code || "",
+    // India Address fields
+    india_address1: profile?.india_address1 || "",
+    india_address2: profile?.india_address2 || "",
+    india_address3: profile?.india_address3 || "",
+    india_city: profile?.india_city || "",
+    india_state: profile?.india_state || "",
+    india_country: profile?.india_country || "",
+    india_pin_code: profile?.india_pin_code || "",
     gcc_phone: profile?.gcc_phone || "",
     india_phone: profile?.india_phone || "",
     is_married: profile?.is_married || false,
@@ -54,6 +67,44 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false,
     child_4_name: profile?.child_4_name || "",
     child_4_dob: profile?.child_4_dob || "",
   });
+
+  useEffect(() => {
+    setFormData({
+      bio: profile?.bio || "",
+      education_level: profile?.education_level || "",
+      school: profile?.school || "",
+      undergraduate_college: profile?.undergraduate_college || "",
+      postgraduate_college: profile?.postgraduate_college || "",
+      display_name: profile?.display_name || "",
+      date_of_birth: profile?.date_of_birth || "",
+      // Gulf Address fields
+      gcc_address1: profile?.gcc_address1 || "",
+      gcc_address2: profile?.gcc_address2 || "",
+      gcc_city: profile?.gcc_city || "",
+      gcc_country: profile?.gcc_country || "",
+      gcc_postal_code: profile?.gcc_postal_code || "",
+      // India Address fields
+      india_address1: profile?.india_address1 || "",
+      india_address2: profile?.india_address2 || "",
+      india_address3: profile?.india_address3 || "",
+      india_city: profile?.india_city || "",
+      india_state: profile?.india_state || "",
+      india_country: profile?.india_country || "",
+      india_pin_code: profile?.india_pin_code || "",
+      gcc_phone: profile?.gcc_phone || "",
+      india_phone: profile?.india_phone || "",
+      is_married: profile?.is_married || false,
+      number_of_children: profile?.number_of_children || 0,
+      child_1_name: profile?.child_1_name || "",
+      child_1_dob: profile?.child_1_dob || "",
+      child_2_name: profile?.child_2_name || "",
+      child_2_dob: profile?.child_2_dob || "",
+      child_3_name: profile?.child_3_name || "",
+      child_3_dob: profile?.child_3_dob || "",
+      child_4_name: profile?.child_4_name || "",
+      child_4_dob: profile?.child_4_dob || "",
+    });
+  }, [profile]);
 
   const handleInputChange = (name: string, value: string | boolean | number) => {
     setFormData((prev) => ({
