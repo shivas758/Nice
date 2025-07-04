@@ -14,14 +14,24 @@ const CompleteProfile = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     bio: "",
-    education_level: "",
+    // education_level: "",
     school: "",
     undergraduate_college: "",
     postgraduate_college: "",
     display_name: "",
     date_of_birth: "",
-    gcc_address: "",
-    india_address: "",
+    gcc_address1: "",
+    gcc_address2: "",
+    gcc_city: "",
+    gcc_country: "",
+    gcc_postal_code: "",
+    india_address1: "",
+    india_address2: "",
+    india_address3: "",
+    india_city: "",
+    india_state: "",
+    india_country: "",
+    india_pin_code: "",
     gcc_phone: "",
     india_phone: "",
     is_married: false,
@@ -44,8 +54,10 @@ const CompleteProfile = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!formData.bio || !formData.education_level || !formData.display_name || 
-          !formData.date_of_birth || !formData.gcc_address || !formData.india_address || 
+      if (!formData.bio  || !formData.display_name || 
+          !formData.date_of_birth ||
+          !formData.gcc_address1 || !formData.gcc_city || !formData.gcc_country || !formData.gcc_postal_code ||
+          !formData.india_address1 || !formData.india_city || !formData.india_state || !formData.india_country || !formData.india_pin_code ||
           !formData.gcc_phone || !formData.india_phone || formData.is_married === undefined) {
         toast({
           title: "Error",
@@ -59,6 +71,8 @@ const CompleteProfile = () => {
         .from("profiles")
         .update({
           ...formData,
+          gcc_address: `${formData.gcc_address1}, ${formData.gcc_address2}, ${formData.gcc_city}, ${formData.gcc_country}, ${formData.gcc_postal_code}`,
+          india_address: `${formData.india_address1}, ${formData.india_address2}, ${formData.india_address3}, ${formData.india_city}, ${formData.india_state}, ${formData.india_country}, ${formData.india_pin_code}`,
           updated_at: new Date().toISOString(),
         })
         .eq("id", session?.user.id);
@@ -111,7 +125,7 @@ const CompleteProfile = () => {
                 onChange={(e) => handleInputChange("bio", e.target.value)}
                 required
                 className="border p-2 rounded w-full min-h-[80px]"
-                placeholder="Please enter 2-3 sentences about your job title, working location, where from in India, etc. For example: My name is Lakshman Reddy. I’m working as a project manager in Dubai for the last 7 years. I’m looking forward to connecting with others in the Gulf countries to learn and help"
+                placeholder="Please enter 2-3 sentences about your job title, working location, where from in India, etc. For example: My name is Lakshman Reddy. I'm working as a project manager in Dubai for the last 7 years. I'm looking forward to connecting with others in the Gulf countries to learn and help"
               />
             </div>
 
@@ -126,15 +140,13 @@ const CompleteProfile = () => {
               />
             </div>
 
-          
-
             <div>
               <Label htmlFor="school">School Name</Label>
               <Input
                 id="school"
                 value={formData.school}
                 onChange={(e) => handleInputChange("school", e.target.value)}
-                 placeholder="St. Joseph’s High School, Warangal"
+                 placeholder="St. Joseph's High School, Warangal"
 
               />
             </div>
@@ -158,23 +170,104 @@ const CompleteProfile = () => {
             </div>
 
             <div>
-              <Label htmlFor="gcc_address">Gulf Address *</Label>
+              <Label htmlFor="gcc_address1">Gulf Address *</Label>
               <Input
-                id="gcc_address"
-                value={formData.gcc_address}
-                onChange={(e) => handleInputChange("gcc_address", e.target.value)}
+                id="gcc_address1"
+                value={formData.gcc_address1}
+                onChange={(e) => handleInputChange("gcc_address1", e.target.value)}
                 required
+                placeholder="Address 1 (e.g., Flat 12B, Al Noor Building)"
               />
+              <Input
+                id="gcc_address2"
+                value={formData.gcc_address2}
+                onChange={(e) => handleInputChange("gcc_address2", e.target.value)}
+                placeholder="Address 2 (optional)"
+                className="mt-2"
+              />
+              <Input
+                id="gcc_city"
+                value={formData.gcc_city}
+                onChange={(e) => handleInputChange("gcc_city", e.target.value)}
+                required
+                placeholder="City (e.g., Dubai)"
+                className="mt-2"
+              />
+              <Input
+                id="gcc_country"
+                value={formData.gcc_country}
+                onChange={(e) => handleInputChange("gcc_country", e.target.value)}
+                required
+                placeholder="Country (e.g., United Arab Emirates)"
+                className="mt-2"
+              />
+              <Input
+                id="gcc_postal_code"
+                value={formData.gcc_postal_code}
+                onChange={(e) => handleInputChange("gcc_postal_code", e.target.value)}
+                required
+                placeholder="Postal Code (e.g., 12345)"
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Please enter your full Gulf address. Accurate address is critical for our services.</p>
             </div>
 
             <div>
-              <Label htmlFor="india_address">India Address *</Label>
+              <Label htmlFor="india_address1">India Address *</Label>
               <Input
-                id="india_address"
-                value={formData.india_address}
-                onChange={(e) => handleInputChange("india_address", e.target.value)}
+                id="india_address1"
+                value={formData.india_address1}
+                onChange={(e) => handleInputChange("india_address1", e.target.value)}
                 required
+                placeholder="Address 1 (e.g., H.No. 1-2-345, Gandhi Nagar)"
               />
+              <Input
+                id="india_address2"
+                value={formData.india_address2}
+                onChange={(e) => handleInputChange("india_address2", e.target.value)}
+                placeholder="Address 2 (optional)"
+                className="mt-2"
+              />
+              <Input
+                id="india_address3"
+                value={formData.india_address3}
+                onChange={(e) => handleInputChange("india_address3", e.target.value)}
+                placeholder="Address 3 (optional)"
+                className="mt-2"
+              />
+              <Input
+                id="india_city"
+                value={formData.india_city}
+                onChange={(e) => handleInputChange("india_city", e.target.value)}
+                required
+                placeholder="City (e.g., Warangal)"
+                className="mt-2"
+              />
+              <Input
+                id="india_state"
+                value={formData.india_state}
+                onChange={(e) => handleInputChange("india_state", e.target.value)}
+                required
+                placeholder="State (e.g., Telangana)"
+                className="mt-2"
+              />
+              <Input
+                id="india_country"
+                value={formData.india_country}
+                onChange={(e) => handleInputChange("india_country", e.target.value)}
+                required
+                placeholder="Country (e.g., India)"
+                className="mt-2"
+              />
+              <Input
+                id="india_pin_code"
+                value={formData.india_pin_code}
+                onChange={(e) => handleInputChange("india_pin_code", e.target.value)}
+                required
+                placeholder="Pin Code (e.g., 506001)"
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Please enter your full Indian address for verification and communication.</p>
             </div>
 
             <div>
