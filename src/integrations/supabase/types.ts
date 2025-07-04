@@ -536,6 +536,24 @@ export type Database = {
           },
         ]
       }
+      country_codes: {
+        Row: {
+          country: string;
+          code: string;
+          is_active: boolean;
+        };
+        Insert: {
+          country: string;
+          code: string;
+          is_active?: boolean;
+        };
+        Update: {
+          country?: string;
+          code?: string;
+          is_active?: boolean;
+        };
+        Relationships: [];
+      };
     }
     Views: {
       [_ in never]: never
