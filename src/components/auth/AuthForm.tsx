@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,8 @@ import { AuthFormFields } from "./AuthFormFields";
 import { useQuery } from "@tanstack/react-query";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Check } from "lucide-react";
+import type { Tables } from '@/integrations/supabase/types';
 
 interface AuthFormProps {
   error?: string | null;
@@ -32,6 +34,10 @@ const AuthForm = ({ error }: AuthFormProps) => {
   const [otp, setOtp] = useState("");
   const [isOTPVerified, setIsOTPVerified] = useState(false);
   const [isVerificationEmailSent, setIsVerificationEmailSent] = useState(false);
+  const [countryCodes, setCountryCodes] = useState<Tables<'country_codes'>[]>([]);
+  const [selectedCountryCode, setSelectedCountryCode] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const resendTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: professions } = useQuery({
     queryKey: ["professions"],
@@ -60,37 +66,104 @@ const AuthForm = ({ error }: AuthFormProps) => {
     },
   });
 
-  const handleSendOTP = () => {
-    if (!mobileNumber) {
+  // Fetch country codes from Supabase
+  useEffect(() => {
+    const fetchCountryCodes = async () => {
+      const { data, error } = await supabase
+        .from('country_codes')
+        .select('country, code')
+        .eq('is_active', true);
+      if (!error && data) {
+        setCountryCodes(data as Tables<'country_codes'>[]);
+        // Prefer +91 (India) as default if present
+        const india = (data as Tables<'country_codes'>[]).find(c => c.code === '91');
+        setSelectedCountryCode(india ? india.code : (data[0]?.code || ''));
+      }
+    };
+    fetchCountryCodes();
+  }, []);
+
+  // Cooldown timer for resend OTP
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      resendTimerRef.current = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    }
+    return () => {
+      if (resendTimerRef.current) clearTimeout(resendTimerRef.current);
+    };
+  }, [resendCooldown]);
+
+  const getFullPhone = () => `+${selectedCountryCode}${mobileNumber}`;
+
+  const handleSendOTP = async () => {
+    if (!mobileNumber || !selectedCountryCode) {
       toast({
         title: "Error",
-        description: "Please enter a mobile number",
+        description: "Please select country code and enter a mobile number",
         variant: "destructive",
       });
       return;
     }
-    toast({
-      title: "Success",
-      description: "OTP sent successfully! (Use 123456)",
-    });
-    setShowOTP(true);
+    try {
+      // const response = await fetch("http://localhost:5001/send-otp", {
+      const response = await fetch("https://nicebackend.netlify.app/send-otp", {
+      // const response = await fetch("https://nicebackend.netlify.app/.netlify/functions/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: getFullPhone() }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send OTP");
+      }
+      toast({
+        title: "Success",
+        description: "OTP sent successfully! Please check your SMS.",
+      });
+      setShowOTP(true);
+      setResendCooldown(30); // 30 seconds cooldown
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to send OTP",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleVerifyOTP = () => {
-    if (otp !== "123456") {
+  const handleVerifyOTP = async () => {
+    if (!otp) {
       toast({
         title: "Error",
-        description: "Invalid OTP",
+        description: "Please enter the OTP",
         variant: "destructive",
       });
       return;
     }
-
-    setIsOTPVerified(true);
-    toast({
-      title: "Success",
-      description: "Mobile number verified successfully!",
-    });
+    try {
+      // const response = await fetch("http://localhost:5001/verify-otp", {
+      const response = await fetch("https://nicebackend.netlify.app/verify-otp",{
+      // const response = await fetch("https://nicebackend.netlify.app/.netlify/functions/send-otp",{
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: getFullPhone(), otp }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "OTP verification failed");
+      }
+      setIsOTPVerified(true);
+      toast({
+        title: "Success",
+        description: "Mobile number verified successfully!",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "OTP verification failed",
+        variant: "destructive",
+      });
+    }
   };
 
   const validateSignUpFields = () => {
@@ -419,16 +492,89 @@ const AuthForm = ({ error }: AuthFormProps) => {
                   </div>
                 </div>
 
-                <OTPVerification
-                  mobileNumber={mobileNumber}
-                  onMobileNumberChange={setMobileNumber}
-                  onSendOTP={handleSendOTP}
-                  onOTPChange={setOtp}
-                  onVerifyOTP={handleVerifyOTP}
-                  otp={otp}
-                  showOTP={showOTP}
-                  isVerified={isOTPVerified}
-                />
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium mb-1">Mobile Number</label>
+                  <div className="flex flex-row items-center gap-2">
+                    <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
+                      <SelectTrigger className="w-full min-w-fit text-xs">
+                        <SelectValue>
+                          {selectedCountryCode
+                            ? (() => {
+                                const selected = countryCodes.find(c => c.code === selectedCountryCode);
+                                return selected ? `+${selected.code} (${selected.country})` : 'Code';
+                              })()
+                            : 'Code'}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countryCodes.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            +{c.code} ({c.country})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <input
+                      type="tel"
+                      placeholder="Mobile Number"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      required
+                      className="border p-2 rounded flex-1 min-w-[120px] max-w-[180px] text-base tracking-widest"
+                      disabled={isOTPVerified}
+                      maxLength={12}
+                      inputMode="numeric"
+                    />
+                    {!showOTP && !isOTPVerified && (
+                      <Button
+                        type="button"
+                        onClick={handleSendOTP}
+                        className="whitespace-nowrap bg-violet-500 hover:bg-violet-600 text-white px-2 py-1 text-xs min-w-fit"
+                        disabled={resendCooldown > 0}
+                      >
+                        {resendCooldown > 0 ? `Resend OTP (${resendCooldown})` : "Send OTP"}
+                      </Button>
+                    )}
+                    {isOTPVerified && (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <Check className="w-5 h-5" />
+                        <span className="text-sm">Verified</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* OTP input and resend button */}
+                  {showOTP && !isOTPVerified && (
+                    <div className="flex flex-row items-center gap-2 mt-2">
+                      <input
+                        type="text"
+                        placeholder="Enter OTP"
+                        value={otp}
+                        onChange={e => setOtp(e.target.value)}
+                        maxLength={6}
+                        className="border p-2 rounded flex-1 min-w-[100px] max-w-[120px] text-base tracking-widest"
+                        inputMode="numeric"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleVerifyOTP}
+                        className="whitespace-nowrap bg-violet-500 hover:bg-violet-600 text-white px-2 py-1 text-xs min-w-fit"
+                      >
+                        Verify OTP
+                      </Button>
+                      {resendCooldown > 0 ? (
+                        <span className="text-xs text-gray-500 ml-2">Resend in {resendCooldown}s</span>
+                      ) : (
+                        <Button
+                          type="button"
+                          onClick={handleSendOTP}
+                          className="whitespace-nowrap bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 text-xs min-w-fit"
+                        >
+                          Resend OTP
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </>
           ) : null}
