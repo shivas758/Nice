@@ -77,29 +77,6 @@ export const ProfileForm = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Select
-          value={formData.location}
-          onValueChange={(value) => handleInputChange("location", value)}
-        >
-          <SelectTrigger className="w-full bg-white">
-            <SelectValue placeholder="Select location" />
-          </SelectTrigger>
-          <SelectContent
-            className="bg-white shadow-lg z-[9999]"
-            position="popper"
-            sideOffset={5}
-          >
-            {locations?.map((location) => (
-              <SelectItem key={location.id} value={location.name}>
-                {location.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="languages">Languages</Label>
         <Select
           value={formData.languages[0]}
