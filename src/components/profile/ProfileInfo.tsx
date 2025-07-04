@@ -124,7 +124,7 @@ export const ProfileInfo = ({ profile, setIsEditProfileOpen, setIsEditing, isLoa
       </div>
 
       {/* Education Section */}
-      {(profile?.education_level || profile?.school_1) && (
+      {(profile?.education_level || profile?.school || profile?.undergraduate_college || profile?.postgraduate_college) && (
         <>
           <div className="my-6 border-t border-gray-200" />
           <div className="space-y-4">
@@ -134,7 +134,9 @@ export const ProfileInfo = ({ profile, setIsEditProfileOpen, setIsEditing, isLoa
             </h3>
             <EducationSection 
               educationLevel={profile.education_level}
-              schools={[profile.school_1, profile.school_2, profile.school_3]}
+              school={profile.school}
+              undergraduate_college={profile.undergraduate_college}
+              postgraduate_college={profile.postgraduate_college}
             />
           </div>
         </>
