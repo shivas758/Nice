@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface BasicInfoFieldsProps {
   formData: {
@@ -34,12 +35,20 @@ export const BasicInfoFields = ({
 
       <div className="space-y-2">
         <Label htmlFor="education_level">Education Level</Label>
-        <Input
-          id="education_level"
+        <Select
           value={formData.education_level}
-          onChange={(e) => handleInputChange("education_level", e.target.value)}
-          placeholder="e.g., Bachelor's Degree"
-        />
+          onValueChange={(value) => handleInputChange("education_level", value)}
+        >
+          <SelectTrigger className="w-full bg-white">
+            <SelectValue placeholder="Select education level" />
+          </SelectTrigger>
+          <SelectContent className="bg-white shadow-lg z-[9999]" position="popper" sideOffset={5}>
+            <SelectItem value="10th">10th</SelectItem>
+            <SelectItem value="12th">12th</SelectItem>
+            <SelectItem value="Undergraduate">Undergraduate</SelectItem>
+            <SelectItem value="Postgraduate">Postgraduate</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
