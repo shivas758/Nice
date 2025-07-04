@@ -30,6 +30,14 @@ interface FilterDialogProps {
   professions?: any[];
   languages?: any[];
   userCurrentLocation: { latitude: number; longitude: number } | null;
+  onClearFilters: () => void;
+  defaultFilters: {
+    profession: string;
+    radius: string;
+    language: string;
+    gender: string;
+    showFriendsOnly: boolean;
+  };
 }
 
 const FilterDialog = ({
@@ -39,10 +47,19 @@ const FilterDialog = ({
   professions,
   languages,
   userCurrentLocation,
+  onClearFilters,
+  defaultFilters,
 }: FilterDialogProps) => {
   const handleSearch = () => {
     onSearch();
   };
+
+  const isAnyFilterActive =
+    filters.profession !== defaultFilters.profession ||
+    filters.radius !== defaultFilters.radius ||
+    filters.language !== defaultFilters.language ||
+    filters.gender !== defaultFilters.gender ||
+    filters.showFriendsOnly !== defaultFilters.showFriendsOnly;
 
   return (
     <Dialog>
@@ -120,7 +137,7 @@ const FilterDialog = ({
               sideOffset={5}
               style={{ zIndex: 51 }}
             >
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All Genders</SelectItem>
               <SelectItem value="Male">Male</SelectItem>
               <SelectItem value="Female">Female</SelectItem>
             </SelectContent>
@@ -158,6 +175,17 @@ const FilterDialog = ({
               onCheckedChange={(checked) => onFilterChange("showFriendsOnly", checked ? "true" : "false")}
             />
           </div>
+
+          {isAnyFilterActive && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onClearFilters}
+              type="button"
+            >
+              Clear Filters
+            </Button>
+          )}
 
           <DialogTrigger asChild>
             <Button 
