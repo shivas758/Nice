@@ -24,6 +24,34 @@ interface PersonalDetailsDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+// Add Gulf countries emergency contact data
+const GULF_COUNTRIES = [
+  {
+    name: "UAE (Dubai)",
+    phoneNumbers: ["800-46342 (800 INDIA, toll-free)", "00971504559594 (chargeable)", "02-4492700 Ext. 260", "0502103813"]
+  },
+  {
+    name: "UAE (Abu Dhabi)",
+    phoneNumbers: ["00-971-1-4492700", "8004632 (800 India, toll-free)"]
+  },
+  {
+    name: "Saudi Arabia (Riyadh)",
+    phoneNumbers: ["00-966-11-4884697", "00-966-542126748 (WhatsApp)", "800 247 1234 (toll-free)"]
+  },
+  {
+    name: "Kuwait",
+    phoneNumbers: ["+965-22562151"]
+  },
+  {
+    name: "Bahrain",
+    phoneNumbers: ["00-973-17714209", "00-973-17180529"]
+  },
+  {
+    name: "Qatar",
+    phoneNumbers: ["00-974-44255708"]
+  }
+];
+
 export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false, children, isOpen: externalIsOpen, onOpenChange }: PersonalDetailsDialogProps) => {
   console.log("Profile prop in PersonalDetailsDialog:", profile);
   const [internalIsOpen, setInternalIsOpen] = useState(isFirstLogin);
@@ -66,6 +94,12 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false,
     child_3_dob: profile?.child_3_dob || "",
     child_4_name: profile?.child_4_name || "",
     child_4_dob: profile?.child_4_dob || "",
+    emergency_contact_1: profile?.emergency_contact_1 || "",
+    emergency_contact_2: profile?.emergency_contact_2 || "",
+    emergency_contact_3: profile?.emergency_contact_3 || "",
+    emergency_contact_4: profile?.emergency_contact_4 || "",
+    emergency_contact_5: profile?.emergency_contact_5 || "",
+    emergency_contact_5_country: profile?.emergency_contact_5_country || "",
   });
 
   useEffect(() => {
@@ -103,6 +137,12 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false,
       child_3_dob: profile?.child_3_dob || "",
       child_4_name: profile?.child_4_name || "",
       child_4_dob: profile?.child_4_dob || "",
+      emergency_contact_1: profile?.emergency_contact_1 || "",
+      emergency_contact_2: profile?.emergency_contact_2 || "",
+      emergency_contact_3: profile?.emergency_contact_3 || "",
+      emergency_contact_4: profile?.emergency_contact_4 || "",
+      emergency_contact_5: profile?.emergency_contact_5 || "",
+      emergency_contact_5_country: profile?.emergency_contact_5_country || "",
     });
   }, [profile]);
 
@@ -171,6 +211,80 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, isFirstLogin = false,
           {formData.is_married && (
             <ChildrenFormFields formData={formData} handleInputChange={handleInputChange} />
           )}
+          {/* Emergency Contacts Section */}
+          <div className="space-y-4 border-t pt-6">
+            <h3 className="text-lg font-semibold">Emergency Contacts</h3>
+            <div>
+              <label htmlFor="emergency_contact_1">Emergency Contact 1 (Immediate Family In India) *</label>
+              <input
+                id="emergency_contact_1"
+                className="w-full border rounded p-2"
+                value={formData.emergency_contact_1}
+                onChange={e => handleInputChange("emergency_contact_1", e.target.value)}
+                placeholder="Enter phone number with Country Code with Country Code"
+              />
+            </div>
+            <div>
+              <label htmlFor="emergency_contact_2">Emergency Contact 2 (Family/Friend in India)</label>
+              <input
+                id="emergency_contact_2"
+                className="w-full border rounded p-2"
+                value={formData.emergency_contact_2}
+                onChange={e => handleInputChange("emergency_contact_2", e.target.value)}
+                placeholder="Enter phone number with Country Code (optional)"
+              />
+            </div>
+            <div>
+              <label htmlFor="emergency_contact_3">Emergency Contact 3 (Family/Friend in Gulf country)</label>
+              <input
+                id="emergency_contact_3"
+                className="w-full border rounded p-2"
+                value={formData.emergency_contact_3}
+                onChange={e => handleInputChange("emergency_contact_3", e.target.value)}
+                placeholder="Enter phone number with Country Code (optional)"
+              />
+            </div>
+            <div>
+              <label htmlFor="emergency_contact_4">Emergency Contact 4 (Family/Friend in Gulf country)</label>
+              <input
+                id="emergency_contact_4"
+                className="w-full border rounded p-2"
+                value={formData.emergency_contact_4}
+                onChange={e => handleInputChange("emergency_contact_4", e.target.value)}
+                placeholder="Enter phone number with Country Code (optional)"
+              />
+            </div>
+            <div>
+              <label htmlFor="emergency_contact_5_country">Emergency Contact 5 (Gulf Country Emergency Number)</label>
+              <select
+                id="emergency_contact_5_country"
+                className="w-full border rounded p-2"
+                value={formData.emergency_contact_5_country}
+                onChange={e => {
+                  const value = e.target.value;
+                  handleInputChange("emergency_contact_5_country", value);
+                  const selectedCountry = GULF_COUNTRIES.find(c => c.name === value);
+                  if (selectedCountry) {
+                    handleInputChange("emergency_contact_5", selectedCountry.phoneNumbers[0]);
+                  } else {
+                    handleInputChange("emergency_contact_5", "");
+                  }
+                }}
+              >
+                <option value="">Select Gulf country</option>
+                {GULF_COUNTRIES.map(country => (
+                  <option key={country.name} value={country.name}>{country.name}</option>
+                ))}
+              </select>
+              <input
+                id="emergency_contact_5"
+                className="w-full border rounded p-2 mt-2"
+                value={formData.emergency_contact_5}
+                onChange={e => handleInputChange("emergency_contact_5", e.target.value)}
+                placeholder="Emergency contact number"
+              />
+            </div>
+          </div>
         </div>
         <Button onClick={handleSubmit} className="w-full">
           Save Changes
