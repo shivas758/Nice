@@ -56,7 +56,6 @@ const Map: React.FC<MapProps> = ({ className, users: propUsers }) => {
 
   // Use propUsers if provided, otherwise fetch all users and filter them
   const { data: fetchedUsers } = useQuery({
-    enabled: !propUsers,
     queryKey: ['map-users', currentUserLocation],
     queryFn: async () => {
       console.log('Fetching all users');
@@ -87,7 +86,6 @@ const Map: React.FC<MapProps> = ({ className, users: propUsers }) => {
       // If no current user location, return all users with valid coordinates
       return data.filter(user => user.latitude && user.longitude);
     },
-    enabled: !propUsers, // Only fetch if propUsers are not provided
   });
 
   const users = propUsers || fetchedUsers;
