@@ -21,6 +21,12 @@ const Profile = () => {
     profession: "",
     location: "",
     languages: [] as string[],
+    emergency_contact_1: "",
+    emergency_contact_2: "",
+    emergency_contact_3: "",
+    emergency_contact_4: "",
+    emergency_contact_5: "",
+    emergency_contact_5_country: "",
   });
   
   // Fetch profile data
@@ -50,6 +56,12 @@ const Profile = () => {
         profession: profile.profession || "",
         location: profile.location || "",
         languages: profile.languages || [],
+        emergency_contact_1: profile.emergency_contact_1 || "",
+        emergency_contact_2: profile.emergency_contact_2 || "",
+        emergency_contact_3: profile.emergency_contact_3 || "",
+        emergency_contact_4: profile.emergency_contact_4 || "",
+        emergency_contact_5: profile.emergency_contact_5 || "",
+        emergency_contact_5_country: profile.emergency_contact_5_country || "",
       });
     }
   }, [profile]);
@@ -116,6 +128,12 @@ const Profile = () => {
           profession: profile.profession || "",
           location: profile.location || "",
           languages: profile.languages || [],
+          emergency_contact_1: profile.emergency_contact_1 || "",
+          emergency_contact_2: profile.emergency_contact_2 || "",
+          emergency_contact_3: profile.emergency_contact_3 || "",
+          emergency_contact_4: profile.emergency_contact_4 || "",
+          emergency_contact_5: profile.emergency_contact_5 || "",
+          emergency_contact_5_country: profile.emergency_contact_5_country || "",
         });
       }
     } catch (error) {
