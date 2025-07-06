@@ -77,9 +77,7 @@ export const BottomNav = () => {
   };
 
   const getSosEndpoint = () =>
-    import.meta.env.DEV
-      ? 'https://nicebackend.netlify.app/.netlify/functions/send-sos'
-      : '/.netlify/functions/send-sos';
+    'https://nicebackend.netlify.app/.netlify/functions/send-sos';
 
   const hasInvalidNumbers = contacts
     .filter(c => selectedContacts.includes(c.value))
