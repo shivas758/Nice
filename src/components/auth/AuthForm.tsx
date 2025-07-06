@@ -105,9 +105,10 @@ const AuthForm = ({ error }: AuthFormProps) => {
       return;
     }
     try {
-      // const response = await fetch("http://localhost:5001/send-otp", {
-      const response = await fetch("https://nicebackend.netlify.app/send-otp", {
-      // const response = await fetch("https://nicebackend.netlify.app/.netlify/functions/send-otp", {
+      // Use environment variable or fallback to proxy in development
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? '/api' : 'https://nicebackend.netlify.app');
+      const endpoint = import.meta.env.DEV ? '/send-otp' : '/.netlify/functions/send-otp';
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: getFullPhone() }),
@@ -123,9 +124,18 @@ const AuthForm = ({ error }: AuthFormProps) => {
       setShowOTP(true);
       setResendCooldown(30); // 30 seconds cooldown
     } catch (err: any) {
+      console.error('OTP send error:', err);
+      let errorMessage = "Failed to send OTP";
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = "Network error: Unable to connect to OTP service. Please check your internet connection.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       toast({
         title: "Error",
-        description: err.message || "Failed to send OTP",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -141,9 +151,10 @@ const AuthForm = ({ error }: AuthFormProps) => {
       return;
     }
     try {
-      // const response = await fetch("http://localhost:5001/verify-otp", {
-      const response = await fetch("https://nicebackend.netlify.app/verify-otp",{
-      // const response = await fetch("https://nicebackend.netlify.app/.netlify/functions/send-otp",{
+      // Use environment variable or fallback to proxy in development
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? '/api' : 'https://nicebackend.netlify.app');
+      const endpoint = import.meta.env.DEV ? '/verify-otp' : '/.netlify/functions/verify-otp';
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: getFullPhone(), otp }),
@@ -158,9 +169,18 @@ const AuthForm = ({ error }: AuthFormProps) => {
         description: "Mobile number verified successfully!",
       });
     } catch (err: any) {
+      console.error('OTP verification error:', err);
+      let errorMessage = "OTP verification failed";
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = "Network error: Unable to connect to OTP service. Please check your internet connection.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       toast({
         title: "Error",
-        description: err.message || "OTP verification failed",
+        description: errorMessage,
         variant: "destructive",
       });
     }
