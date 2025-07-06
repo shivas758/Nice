@@ -1,169 +1,127 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ProfileForm } from "./ProfileForm";
 import { useToast } from "@/hooks/use-toast";
-import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
-const Profile = () => {
-  const { user } = useAuth();
+interface EditProfileDialogProps {
+  isEditing: boolean;
+  setIsEditing: (value: boolean) => void;
+  formData: any;
+  handleInputChange: (name: string, value: string | string[]) => void;
+  handleUpdateProfile: () => void;
+  professions: Array<{ id: number; name: string }>;
+  locations: Array<{ id: number; name: string }>;
+  languages: Array<{ id: number; name: string }>;
+  profile: any;
+}
+
+import { useState } from "react";
+
+export const EditProfileDialog = ({
+  isEditing,
+  setIsEditing,
+  formData,
+  handleInputChange,
+  handleUpdateProfile,
+  professions,
+  locations,
+  languages,
+  profile,
+}: EditProfileDialogProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const { user } = useAuth();
 
-  const handleEditDialogState = (state: boolean) => {
-    console.log("Setting edit state to:", state);
-    setIsEditing(state);
-  };
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    profession: "",
-    location: "",
-    languages: [] as string[],
-    emergency_contact_1: "",
-    emergency_contact_2: "",
-    emergency_contact_3: "",
-    emergency_contact_4: "",
-    emergency_contact_5: "",
-    emergency_contact_5_country: "",
-  });
-  
-  // Fetch profile data
-  const { data: profile, isLoading, refetch } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
+  const onUpdateProfile = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
       if (!user?.id) throw new Error("No user ID");
-      
-      const { data: existingProfile, error: fetchError } = await supabase
+
+      const { error } = await supabase
         .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+        .update({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          profession: formData.profession,
+          location: formData.location,
+          languages: formData.languages,
+          emergency_contact_1: formData.emergency_contact_1,
+          emergency_contact_2: formData.emergency_contact_2,
+          emergency_contact_3: formData.emergency_contact_3,
+          emergency_contact_4: formData.emergency_contact_4,
+          emergency_contact_5: formData.emergency_contact_5,
+          emergency_contact_5_country: formData.emergency_contact_5_country,
+        })
+        .eq("id", user.id);
 
-      if (fetchError) throw fetchError;
+      if (error) throw error;
 
-      return existingProfile;
-    },
-  });
-
-  // Initialize form data with profile data when profile is loaded
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        first_name: profile.first_name || "",
-        last_name: profile.last_name || "",
-        profession: profile.profession || "",
-        location: profile.location || "",
-        languages: profile.languages || [],
-        emergency_contact_1: profile.emergency_contact_1 || "",
-        emergency_contact_2: profile.emergency_contact_2 || "",
-        emergency_contact_3: profile.emergency_contact_3 || "",
-        emergency_contact_4: profile.emergency_contact_4 || "",
-        emergency_contact_5: profile.emergency_contact_5 || "",
-        emergency_contact_5_country: profile.emergency_contact_5_country || "",
+      toast({
+        title: "Success",
+        description: "Profile updated successfully!",
       });
-    }
-  }, [profile]);
-
-
-
-  // Fetch dropdown options
-  const { data: professions } = useQuery({
-    queryKey: ["professions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("professions")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: locations } = useQuery({
-    queryKey: ["locations"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("locations")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: languages } = useQuery({
-    queryKey: ["languages"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("languages")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Handle input changes
-  const handleInputChange = (name: string, value: string | string[]) => {
-    try {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
+      
+      // Close dialog first
+      handleClose(false);
+      // Then update profile data
+      setTimeout(() => {
+        handleUpdateProfile();
+      }, 100);
     } catch (error) {
-      console.error("Error updating form data:", error);
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleEditClose = () => {
+  const handleClose = (open: boolean) => {
     try {
-      setIsEditing(false);
-      // Reset form data to current profile values
-      if (profile) {
-        setFormData({
-          first_name: profile.first_name || "",
-          last_name: profile.last_name || "",
-          profession: profile.profession || "",
-          location: profile.location || "",
-          languages: profile.languages || [],
-          emergency_contact_1: profile.emergency_contact_1 || "",
-          emergency_contact_2: profile.emergency_contact_2 || "",
-          emergency_contact_3: profile.emergency_contact_3 || "",
-          emergency_contact_4: profile.emergency_contact_4 || "",
-          emergency_contact_5: profile.emergency_contact_5 || "",
-          emergency_contact_5_country: profile.emergency_contact_5_country || "",
-        });
-      }
+      setIsEditing(open);
     } catch (error) {
-      console.error("Error closing edit dialog:", error);
+      console.error("Error handling dialog:", error);
     }
   };
 
   return (
-    <div className="pb-20 p-4">
-      <ProfileHeader
-        profile={profile}
-        setIsEditing={handleEditDialogState}
-        isLoading={isLoading}
-        onProfileUpdate={refetch}
-      />
-      {!isLoading && (
-        <EditProfileDialog
-          isEditing={isEditing}
-          setIsEditing={handleEditDialogState}
+    <Dialog
+      open={isEditing}
+      onOpenChange={(open) => handleClose(open)}
+    >
+      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+        </DialogHeader>
+        <ProfileForm
           formData={formData}
           handleInputChange={handleInputChange}
-          handleUpdateProfile={refetch}
-          professions={professions || []}
-          locations={locations || []}
-          languages={languages || []}
+          professions={professions}
+          locations={locations}
+          languages={languages}
           profile={profile}
         />
-      )}
-    </div>
+        <Button
+          onClick={onUpdateProfile}
+          type="submit"
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? "Saving..." : "Save Changes"}
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-export default Profile;
