@@ -9,6 +9,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api': {
+        target: 'https://nicebackend.netlify.app',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/.netlify/functions'),
+        secure: true,
+      }
+    }
   },
   plugins: [
     react(),
