@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Cursor, VS
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -54,9 +54,21 @@ This project is built with .
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Environment Setup
 
-Simply open [Lovable](https://lovable.dev/projects/90c2c221-14f5-47e6-a796-9880d0742bc0) and click on Share -> Publish.
+To run this project locally, you need to set up environment variables. Create a `.env` file in the root directory with the following variables:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=your_supabase_url_here
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+<!-- # App Configuration
+
+```
+
+## How can I deploy this project?
+simply commit the code into github and publish whereever we want (NETLIFY)
 
 ## I want to use a custom domain - is that possible?
 If you want to deploy your project under your own domain then we recommend use popular Domain Providers like
