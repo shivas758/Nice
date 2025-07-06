@@ -412,6 +412,12 @@ export type Database = {
           display_name: string | null
           education_level: string | null
           email_confirmed: boolean | null
+          emergency_contact_1: string | null
+          emergency_contact_2: string | null
+          emergency_contact_3: string | null
+          emergency_contact_4: string | null
+          emergency_contact_5: string | null
+          emergency_contact_5_country: string | null
           first_name: string | null
           gcc_address: string | null
           gcc_phone: string | null
@@ -448,6 +454,12 @@ export type Database = {
           display_name?: string | null
           education_level?: string | null
           email_confirmed?: boolean | null
+          emergency_contact_1?: string | null
+          emergency_contact_2?: string | null
+          emergency_contact_3?: string | null
+          emergency_contact_4?: string | null
+          emergency_contact_5?: string | null
+          emergency_contact_5_country?: string | null
           first_name?: string | null
           gcc_address?: string | null
           gcc_phone?: string | null
@@ -484,6 +496,12 @@ export type Database = {
           display_name?: string | null
           education_level?: string | null
           email_confirmed?: boolean | null
+          emergency_contact_1?: string | null
+          emergency_contact_2?: string | null
+          emergency_contact_3?: string | null
+          emergency_contact_4?: string | null
+          emergency_contact_5?: string | null
+          emergency_contact_5_country?: string | null
           first_name?: string | null
           gcc_address?: string | null
           gcc_phone?: string | null
