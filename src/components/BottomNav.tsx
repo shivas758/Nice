@@ -26,6 +26,10 @@ export const BottomNav = () => {
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [profile, setProfile] = useState(null);
 
+  const SOS_ENDPOINT = import.meta.env.VITE_SOS_ENDPOINT || 'https://nicebackend.netlify.app/.netlify/functions/send-sos';
+  const OTP_ENDPOINT = import.meta.env.VITE_OTP_ENDPOINT || 'https://nicebackend.netlify.app/.netlify/functions/send-otp';
+  const VERIFY_OTP_ENDPOINT = import.meta.env.VITE_VERIFY_OTP_ENDPOINT || 'https://nicebackend.netlify.app/.netlify/functions/verify-otp';
+
   useEffect(() => {
     if (sosOpen && user?.id) {
       supabase
@@ -76,8 +80,9 @@ export const BottomNav = () => {
     return Promise.resolve("Location not available");
   };
 
-  const getSosEndpoint = () =>
-    'https://nicebackend.netlify.app/.netlify/functions/send-sos';
+  const getSosEndpoint = () => SOS_ENDPOINT;
+  const getOtpEndpoint = () => OTP_ENDPOINT;
+  const getVerifyOtpEndpoint = () => VERIFY_OTP_ENDPOINT;
 
   const hasInvalidNumbers = contacts
     .filter(c => selectedContacts.includes(c.value))
