@@ -35,7 +35,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
   const [isOTPVerified, setIsOTPVerified] = useState(false);
   const [isVerificationEmailSent, setIsVerificationEmailSent] = useState(false);
   const [countryCodes, setCountryCodes] = useState<Tables<'country_codes'>[]>([]);
-  const [selectedCountryCode, setSelectedCountryCode] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<{ code: string; country: string } | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const resendTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,7 +77,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
         setCountryCodes(data as Tables<'country_codes'>[]);
         // Prefer +91 (India) as default if present
         const india = (data as Tables<'country_codes'>[]).find(c => c.code === '91');
-        setSelectedCountryCode(india ? india.code : (data[0]?.code || ''));
+        setSelectedCountry(india ? { code: india.code, country: india.country } : { code: data[0]?.code || '', country: data[0]?.country || '' });
       }
     };
     fetchCountryCodes();
@@ -93,13 +93,13 @@ const AuthForm = ({ error }: AuthFormProps) => {
     };
   }, [resendCooldown]);
 
-  const getFullPhone = () => `+${selectedCountryCode}${mobileNumber}`;
+  const getFullPhone = () => selectedCountry ? `+${selectedCountry.code}${mobileNumber}` : '';
 
   const OTP_ENDPOINT = import.meta.env.VITE_OTP_ENDPOINT || 'https://nicebackend.netlify.app/.netlify/functions/send-otp';
   const VERIFY_OTP_ENDPOINT = import.meta.env.VITE_VERIFY_OTP_ENDPOINT || 'https://nicebackend.netlify.app/.netlify/functions/verify-otp';
 
   const handleSendOTP = async () => {
-    if (!mobileNumber || !selectedCountryCode) {
+    if (!mobileNumber || !selectedCountry) {
       toast({
         title: "Error",
         description: "Please select country code and enter a mobile number",
@@ -450,7 +450,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
                 </div>
                 <Select value={profession} onValueChange={setProfession}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select profession" />
+                    <SelectValue placeholder="Select Profession" />
                   </SelectTrigger>
                   <SelectContent>
                     {professions?.map((p) => (
@@ -462,7 +462,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
                 </Select>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select language" />
+                    <SelectValue placeholder="Select Language" />
                   </SelectTrigger>
                   <SelectContent>
                     {languages?.map((l) => (
@@ -474,7 +474,7 @@ const AuthForm = ({ error }: AuthFormProps) => {
                 </Select>
                 <Select value={education} onValueChange={setEducation}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select education level" />
+                    <SelectValue placeholder="Select Education Level" />
                   </SelectTrigger>
                   <SelectContent>
                     {["10th", "12th", "Undergraduate", "Postgraduate"].map((option) => (
@@ -510,20 +510,21 @@ const AuthForm = ({ error }: AuthFormProps) => {
                 <div className="space-y-1">
                   <label className="block text-sm font-medium mb-1">Mobile Number</label>
                   <div className="flex flex-row items-center gap-2">
-                    <Select value={selectedCountryCode} onValueChange={setSelectedCountryCode}>
+                    <Select
+                      value={selectedCountry ? `${selectedCountry.code}|${selectedCountry.country}` : ''}
+                      onValueChange={val => {
+                        const [code, country] = val.split('|');
+                        setSelectedCountry({ code, country });
+                      }}
+                    >
                       <SelectTrigger className="w-full min-w-fit text-xs">
                         <SelectValue>
-                          {selectedCountryCode
-                            ? (() => {
-                                const selected = countryCodes.find(c => c.code === selectedCountryCode);
-                                return selected ? `+${selected.code} (${selected.country})` : 'Code';
-                              })()
-                            : 'Code'}
+                          {selectedCountry ? `+${selectedCountry.code} (${selectedCountry.country})` : 'Code'}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {countryCodes.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>
+                          <SelectItem key={`${c.code}|${c.country}`} value={`${c.code}|${c.country}`}>
                             +{c.code} ({c.country})
                           </SelectItem>
                         ))}
@@ -531,11 +532,12 @@ const AuthForm = ({ error }: AuthFormProps) => {
                     </Select>
                     <input
                       type="tel"
-                      placeholder="Mobile Number"
+                  //   placeholder="Enter numbers only without country code and spaces - for example, Dubai number: 48888888"
+                      placeholder="e.g., 48888888"
                       value={mobileNumber}
                       onChange={(e) => setMobileNumber(e.target.value)}
                       required
-                      className="border p-2 rounded flex-1 min-w-[120px] max-w-[180px] text-base tracking-widest"
+                      className="border p-2 rounded flex-1 min-w-[120px] max-w-[180px] text-base tracking-widest placeholder:text-[10px] placeholder:opacity-70"
                       disabled={isOTPVerified}
                       maxLength={12}
                       inputMode="numeric"
@@ -590,6 +592,9 @@ const AuthForm = ({ error }: AuthFormProps) => {
                     </div>
                   )}
                 </div>
+                <p className="text-[10px] text-gray-500 mt-1">
+                Enter numbers only without country code or spaces.<br/>For example: <strong>Dubai number: 48888888</strong></p>
+
               </div>
             </>
           ) : null}
