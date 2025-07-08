@@ -40,7 +40,7 @@ export const BasicInfoFields = ({
           onValueChange={(value) => handleInputChange("education_level", value)}
         >
           <SelectTrigger className="w-full bg-white">
-            <SelectValue placeholder="Select education level" />
+            <SelectValue placeholder="Select Education Level" />
           </SelectTrigger>
           <SelectContent className="bg-white shadow-lg z-[9999]" position="popper" sideOffset={5}>
             <SelectItem value="10th">10th</SelectItem>
