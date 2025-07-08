@@ -100,7 +100,7 @@ export const ProfileForm = ({
           onValueChange={(value) => handleInputChange("profession", value)}
         >
           <SelectTrigger className="w-full bg-white">
-            <SelectValue placeholder="Select profession" />
+            <SelectValue placeholder="Select Profession" />
           </SelectTrigger>
           <SelectContent
             className="bg-white shadow-lg z-[9999]"
@@ -123,7 +123,7 @@ export const ProfileForm = ({
           onValueChange={(value) => handleInputChange("languages", [value])}
         >
           <SelectTrigger className="w-full bg-white">
-            <SelectValue placeholder="Select language" />
+            <SelectValue placeholder="Select Language" />
           </SelectTrigger>
           <SelectContent
             className="bg-white shadow-lg z-[9999]"
