@@ -81,7 +81,7 @@ export const AuthFormFields = ({
           />
           <Select value={profession} onValueChange={onProfessionChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select profession" />
+              <SelectValue placeholder="Select Profession" />
             </SelectTrigger>
             <SelectContent>
               {professions?.map((profession) => (
@@ -93,7 +93,7 @@ export const AuthFormFields = ({
           </Select>
           <Select value={language} onValueChange={onLanguageChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select language" />
+              <SelectValue placeholder="Select Language" />
             </SelectTrigger>
             <SelectContent>
               {languages?.map((language) => (
@@ -105,7 +105,7 @@ export const AuthFormFields = ({
           </Select>
           <Select value={education} onValueChange={onEducationChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select education level" />
+              <SelectValue placeholder="Select Education Level" />
             </SelectTrigger>
             <SelectContent>
               {educationOptions.map((option) => (
